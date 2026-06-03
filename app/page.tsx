@@ -1,65 +1,209 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import Image from "next/image"
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { compareCharacters, Character, AttributeResult } from '../lib/game-logic'
+
+const MAX_GUESSES = 6
+
+export default function CharactersPage() {
+  const [allCharacters, setAllCharacters] = useState<Character[]>([])
+  const [target, setTarget] = useState<Character | null>(null)
+  const [search, setSearch] = useState('')
+  const [suggestions, setSuggestions] = useState<Character[]>([])
+  const [guesses, setGuesses] = useState<{ char: Character; results: AttributeResult[] }[]>([])
+  const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing')
+  const [loading, setLoading] = useState(true)
+
+  // Charger tous les personnages au démarrage
+  useEffect(() => {
+    async function load() {
+      const response = await supabase
+        .from('characters')
+        .select('*')
+        .not('name', 'is', null)
+        .order('name')
+
+      const data = response.data as Character[] | null
+      if (data && data.length > 0) {
+        setAllCharacters(data)
+        // Choisir un perso aléatoire comme cible
+        const random = data[Math.floor(Math.random() * data.length)]
+        setTarget(random)
+      }
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  // Filtrer les suggestions selon la recherche
+  useEffect(() => {
+    if (search.length < 2) {
+      setSuggestions([])
+      return
+    }
+    const alreadyGuessed = guesses.map(g => g.char.id)
+    const filtered = allCharacters
+      .filter(c =>
+        c.name &&
+        c.name.toLowerCase().includes(search.toLowerCase()) &&
+        !alreadyGuessed.includes(c.id)
+      )
+      .slice(0, 6)
+    setSuggestions(filtered)
+  }, [search, allCharacters, guesses])
+
+  function handleGuess(char: Character) {
+    if (!target || status !== 'playing') return
+
+    const results = compareCharacters(char, target)
+    const newGuesses = [...guesses, { char, results }]
+    setGuesses(newGuesses)
+    setSearch('')
+    setSuggestions([])
+
+    const won = results.every(r => r.match === 'correct') || char.id === target.id
+    if (won) {
+      setStatus('won')
+    } else if (newGuesses.length >= MAX_GUESSES) {
+      setStatus('lost')
+    }
+  }
+
+  function reset() {
+    const random = allCharacters[Math.floor(Math.random() * allCharacters.length)]
+    setTarget(random)
+    setGuesses([])
+    setSearch('')
+    setStatus('playing')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <p className="text-amber-400 text-xl animate-pulse">Chargement des personnages...</p>
+      </div>
+    )
+  }
+
+  const COLUMNS = ['Maison', 'Espèce', 'Genre', 'Bois baguette', 'Cœur baguette', 'Patronus', 'Étudiant']
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-amber-400 mb-2">⚡ HP Gamedle</h1>
+          <p className="text-gray-400">Trouve le personnage Harry Potter en {MAX_GUESSES} essais</p>
+          <p className="text-gray-500 text-sm mt-1">
+            {MAX_GUESSES - guesses.length} essai(s) restant(s)
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Message victoire / défaite */}
+        {status === 'won' && (
+          <div className="bg-green-900 border border-green-500 rounded-lg p-4 text-center mb-6">
+            <p className="text-green-300 text-xl font-bold">
+              Félicitations ! C'était {target?.name} !
+            </p>
+            <button onClick={reset} className="mt-3 bg-green-600 hover:bg-green-500 px-6 py-2 rounded-lg text-white">
+              Rejouer
+            </button>
+          </div>
+        )}
+
+        {status === 'lost' && (
+          <div className="bg-red-900 border border-red-500 rounded-lg p-4 text-center mb-6">
+            <p className="text-red-300 text-xl font-bold">
+              Perdu ! C'était {target?.name}
+            </p>
+            {target?.image_url && (
+              <img src={target.image_url ?? undefined} alt={target.name ?? ''}
+                className="w-24 h-24 object-cover rounded-full mx-auto mt-3" />
+            )}
+            <button onClick={reset} className="mt-3 bg-red-600 hover:bg-red-500 px-6 py-2 rounded-lg text-white">
+              Rejouer
+            </button>
+          </div>
+        )}
+
+        {/* Barre de recherche */}
+        {status === 'playing' && (
+          <div className="relative mb-8">
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Tape un nom de personnage..."
+              className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-400"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {suggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-gray-800 border border-gray-600 rounded-lg mt-1 overflow-hidden">
+                {suggestions.map(char => (
+                  <button
+                    key={char.id}
+                    onClick={() => handleGuess(char)}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-700 flex items-center gap-3 border-b border-gray-700 last:border-0"
+                  >
+                    {char.image_url && (
+                      <img src={char.image_url ?? undefined} alt={char.name ?? ''}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    )}
+                    <span>{char.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* En-têtes colonnes */}
+        {guesses.length > 0 && (
+          <div className="mb-2">
+            <div className="grid gap-1" style={{ gridTemplateColumns: '180px repeat(7, 1fr)' }}>
+              <div />
+              {COLUMNS.map(col => (
+                <div key={col} className="text-center text-xs text-gray-500 font-medium px-1">
+                  {col}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Lignes de résultats */}
+        <div className="flex flex-col gap-2">
+          {guesses.map((g, i) => (
+            <div key={i} className="grid gap-1 items-center"
+              style={{ gridTemplateColumns: '180px repeat(7, 1fr)' }}>
+
+              {/* Nom + photo */}
+              <div className="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2">
+                {g.char.image_url && (
+                  <img src={g.char.image_url ?? undefined} alt={g.char.name ?? ''}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                )}
+                <span className="text-sm font-medium truncate">{g.char.name}</span>
+              </div>
+
+              {/* Attributs colorés */}
+              {g.results.map((r, j) => (
+                <div key={j}
+                  className={`rounded-lg py-2 px-1 text-center text-xs font-medium
+                    ${r.match === 'correct'
+                      ? 'bg-green-700 text-green-100'
+                      : 'bg-gray-700 text-gray-300'
+                    }`}>
+                  {r.value}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
-      </main>
+
+      </div>
     </div>
-  );
+  )
 }
