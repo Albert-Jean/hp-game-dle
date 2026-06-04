@@ -18,23 +18,42 @@ export default function CharactersPage() {
 
   // Charger tous les personnages au démarrage
   useEffect(() => {
-    async function load() {
-      const response = await supabase
-        .from('characters')
-        .select('*')
-        .not('name', 'is', null)
-        .order('name')
+  async function load() {
+    // 1. Fetch all characters for autocomplete
+    const { data: allChars } = await supabase
+      .from('characters')
+      .select('*')
+      .order('name')
 
-      const data = response.data as Character[] | null
-      if (data && data.length > 0) {
-        setAllCharacters(data)
-        // Choisir un perso aléatoire comme cible
-        const random = data[Math.floor(Math.random() * data.length)]
-        setTarget(random)
-      }
+    if (allChars) setAllCharacters(allChars)
+
+    // 2. Fetch today's character from daily_games
+    const today = new Date().toISOString().split('T')[0]
+
+    const { data: daily } = await supabase
+      .from('daily_games')
+      .select('entity_id')
+      .eq('game_date', today)
+      .eq('mode', 'characters')
+      .maybeSingle()
+
+    if (!daily) {
+      console.error('No daily game found for today')
       setLoading(false)
+      return
     }
-    load()
+
+    // 3. Fetch the actual character
+    const { data: targetChar } = await supabase
+      .from('characters')
+      .select('*')
+      .eq('id', daily.entity_id)
+      .single()
+
+    if (targetChar) setTarget(targetChar)
+    setLoading(false)
+  }
+  load()
   }, [])
 
   // Filtrer les suggestions selon la recherche

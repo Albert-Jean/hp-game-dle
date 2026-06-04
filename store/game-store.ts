@@ -18,6 +18,7 @@ interface GameState {
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
+      name: `hp-gamedle-characters-${new Date().toISOString().split('T')[0]}`,
       guesses: [],
       gameStatus: 'playing',
       target: null,
