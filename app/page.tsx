@@ -63,7 +63,7 @@ export default function CharactersPage() {
     setSearch('')
     setSuggestions([])
 
-    const won = results.every(r => r.match === 'correct') || char.id === target.id
+    const won = char.id === target.id
     if (won) {
       setStatus('won')
     } else if (newGuesses.length >= MAX_GUESSES) {
