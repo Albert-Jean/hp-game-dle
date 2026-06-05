@@ -1,22 +1,20 @@
 export type MatchResult = 'correct' | 'wrong'
 
+export interface AttributeResult {
+  label: string
+  value: string
+  match: MatchResult
+}
 export interface Character {
   id: string
   name: string
   house: string | null
   species: string | null
   gender: string | null
-  wand_wood: string | null
-  wand_core: string | null
+  blood_status: string | null   // ← remplace wand_wood et wand_core
   patronus: string | null
   is_student: boolean | null
   image_url: string | null
-}
-
-export interface AttributeResult {
-  label: string
-  value: string
-  match: MatchResult
 }
 
 export function compareCharacters(
@@ -43,14 +41,9 @@ export function compareCharacters(
       match: guess.gender === target.gender ? 'correct' : 'wrong'
     },
     {
-      label: 'Bois baguette',
-      value: val(guess.wand_wood),
-      match: guess.wand_wood === target.wand_wood ? 'correct' : 'wrong'
-    },
-    {
-      label: 'Cœur baguette',
-      value: val(guess.wand_core),
-      match: guess.wand_core === target.wand_core ? 'correct' : 'wrong'
+      label: 'Statut du sang',    // ← remplace baguette
+      value: val(guess.blood_status),
+      match: guess.blood_status === target.blood_status ? 'correct' : 'wrong'
     },
     {
       label: 'Patronus',
@@ -64,3 +57,5 @@ export function compareCharacters(
     },
   ]
 }
+
+  
