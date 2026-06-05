@@ -15,6 +15,7 @@ export interface Character {
   patronus: string | null
   is_student: boolean | null
   image_url: string | null
+  first_appearance: string | null
 }
 
 export function compareCharacters(
@@ -44,6 +45,11 @@ export function compareCharacters(
       label: 'Statut du sang',    // ← remplace baguette
       value: val(guess.blood_status),
       match: guess.blood_status === target.blood_status ? 'correct' : 'wrong'
+    },
+    {
+      label: 'Première apparition',
+      value: val(guess.first_appearance),
+      match: guess.first_appearance === target.first_appearance ? 'correct' : 'wrong'
     },
     {
       label: 'Patronus',

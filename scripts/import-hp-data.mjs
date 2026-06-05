@@ -27,6 +27,7 @@ const characters = JSON.parse(raw).map((c, i) => ({
   patronus: c.patronus !== 'None' ? c.patronus : null,
   is_student: c.is_student ?? false,
   image_url: c.image_url || null,
+  first_appearance: c.first_appearance || null,
 }))
 
 console.log(`📦 ${characters.length} personnages à importer...`)

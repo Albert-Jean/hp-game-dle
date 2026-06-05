@@ -25,20 +25,26 @@ const HOUSE_COLORS: Record<string, { bg: string; border: string; text: string; g
 
 // Particle system for victory
 function VictoryParticles() {
+  const [particles, setParticles] = useState<{ x: string; delay: string; duration: string; size: string; color: string }[]>([])
+
+  useEffect(() => {
+    const colors = ['#FFD700','#ae0001','#1a472a','#ecb939','#a8b8e8']
+    setParticles(Array.from({ length: 40 }, () => ({
+      x: `${Math.random() * 100}vw`,
+      delay: `${Math.random() * 2}s`,
+      duration: `${2 + Math.random() * 3}s`,
+      size: `${4 + Math.random() * 8}px`,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    })))
+  }, [])
+
   return (
     <div className="victory-particles" aria-hidden="true">
-      {Array.from({ length: 40 }).map((_, i) => (
-        <div
-          key={i}
-          className="particle"
-          style={{
-            '--x': `${Math.random() * 100}vw`,
-            '--delay': `${Math.random() * 2}s`,
-            '--duration': `${2 + Math.random() * 3}s`,
-            '--size': `${4 + Math.random() * 8}px`,
-            '--color': ['#FFD700', '#ae0001', '#1a472a', '#ecb939', '#a8b8e8'][Math.floor(Math.random() * 5)],
-          } as React.CSSProperties}
-        />
+      {particles.map((p, i) => (
+        <div key={i} className="particle" style={{
+          '--x': p.x, '--delay': p.delay, '--duration': p.duration,
+          '--size': p.size, '--color': p.color,
+        } as React.CSSProperties} />
       ))}
     </div>
   )
@@ -46,18 +52,24 @@ function VictoryParticles() {
 
 // Magical floating orbs background
 function MagicalBackground() {
+  const [stars, setStars] = useState<{ x: string; y: string; delay: string; size: string }[]>([])
+
+  useEffect(() => {
+    setStars(Array.from({ length: 60 }, () => ({
+      x: `${Math.random() * 100}%`,
+      y: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 4}s`,
+      size: `${1 + Math.random() * 2}px`,
+    })))
+  }, [])
+
   return (
     <div className="magical-bg" aria-hidden="true">
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
+      <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
       <div className="stars">
-        {Array.from({ length: 60 }).map((_, i) => (
+        {stars.map((s, i) => (
           <div key={i} className="star" style={{
-            '--x': `${Math.random() * 100}%`,
-            '--y': `${Math.random() * 100}%`,
-            '--delay': `${Math.random() * 4}s`,
-            '--size': `${1 + Math.random() * 2}px`,
+            '--x': s.x, '--y': s.y, '--delay': s.delay, '--size': s.size
           } as React.CSSProperties} />
         ))}
       </div>
@@ -202,7 +214,7 @@ export default function CharactersPage() {
         .from('characters')
         .select('*')
         .order('name')
-
+      console.log('Premier perso:', allChars?.[0])
       if (allChars) setAllCharacters(allChars)
 
       const today = new Date().toISOString().split('T')[0]
@@ -265,7 +277,7 @@ export default function CharactersPage() {
     setTimeout(() => inputRef.current?.focus(), 100)
   }
 
-  const COLUMNS = ['Maison', 'Espèce', 'Genre', 'Statut du sang', 'Patronus', 'Étudiant', 'Premier livre']
+  const COLUMNS = ['Maison', 'Espèce', 'Genre', 'Statut du sang','Premier livre','Patronus', 'Étudiant']
   const remaining = MAX_GUESSES - guesses.length
 
   if (loading) {
