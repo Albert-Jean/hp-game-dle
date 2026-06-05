@@ -20,6 +20,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: hp-gamedle
+          projectName: hp-game-dle
           directory: .next
           gitHubToken: ${{secrets.GITHUB_TOKEN}}
