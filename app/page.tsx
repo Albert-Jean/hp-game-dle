@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { compareCharacters, Character, AttributeResult } from '@/lib/game-logic'
 
+const TODAY = new Date().toISOString().split('T')[0]
+const STORAGE_KEY = `hp-gamedle-characters-${TODAY}`
+
 const MAX_GUESSES = 6
 
 const BOOK_SHORT: Record<string, string> = {
@@ -197,46 +200,64 @@ function LoseScreen({ target, onReset }: { target: Character; onReset: () => voi
 }
 
 export default function CharactersPage() {
-  const [allCharacters, setAllCharacters] = useState<Character[]>([])
-  const [target, setTarget] = useState<Character | null>(null)
-  const [search, setSearch] = useState('')
-  const [suggestions, setSuggestions] = useState<Character[]>([])
-  const [guesses, setGuesses] = useState<{ char: Character; results: AttributeResult[] }[]>([])
-  const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing')
-  const [loading, setLoading] = useState(true)
-  const [shakeInput, setShakeInput] = useState(false)
+const [allCharacters, setAllCharacters] = useState<Character[]>([])
+const [target, setTarget] = useState<Character | null>(null)
+const [search, setSearch] = useState('')
+const [suggestions, setSuggestions] = useState<Character[]>([])
+const [guesses, setGuesses] = useState<{ char: Character; results: AttributeResult[] }[]>([])
+const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing')
+const [loading, setLoading] = useState(true)
+const [shakeInput, setShakeInput] = useState(false)
+const [alreadyPlayed, setAlreadyPlayed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    async function load() {
-      const { data: allChars } = await supabase
-        .from('characters')
-        .select('*')
-        .order('name')
-      console.log('Premier perso:', allChars?.[0])
-      if (allChars) setAllCharacters(allChars)
+// Charger depuis localStorage au démarrage
+useEffect(() => {
+  const saved = localStorage.getItem(STORAGE_KEY)
+  if (saved) {
+    const parsed = JSON.parse(saved)
+    setGuesses(parsed.guesses)
+    setStatus(parsed.status)
+    setAlreadyPlayed(true)
+  }
+}, [])
 
-      const today = new Date().toISOString().split('T')[0]
-      const { data: daily } = await supabase
-        .from('daily_games')
-        .select('entity_id')
-        .eq('game_date', today)
-        .eq('mode', 'characters')
-        .maybeSingle()
+// Sauvegarder dans localStorage à chaque guess
+useEffect(() => {
+  if (guesses.length > 0) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ guesses, status }))
+  }
+}, [guesses, status])
 
-      if (daily && allChars) {
-        const found = allChars.find(c => c.id === daily.entity_id)
-        if (found) setTarget(found)
-        else setTarget(allChars[Math.floor(Math.random() * allChars.length)])
-      } else if (allChars) {
-        setTarget(allChars[Math.floor(Math.random() * allChars.length)])
-      }
+useEffect(() => {
+  async function load() {
+    const { data: allChars } = await supabase
+      .from('characters')
+      .select('*')
+      .order('name')
 
-      setLoading(false)
+    if (allChars) setAllCharacters(allChars)
+
+    const today = new Date().toISOString().split('T')[0]
+    const { data: daily } = await supabase
+      .from('daily_games')
+      .select('entity_id')
+      .eq('game_date', today)
+      .eq('mode', 'characters')
+      .maybeSingle()
+
+    if (daily && allChars) {
+      const found = allChars.find(c => c.id === daily.entity_id)
+      setTarget(found ?? allChars[Math.floor(Math.random() * allChars.length)])
+    } else if (allChars) {
+      setTarget(allChars[Math.floor(Math.random() * allChars.length)])
     }
-    load()
-  }, [])
+
+    setLoading(false)
+  }
+  load()
+}, [])
 
   useEffect(() => {
     if (search.length < 2) { setSuggestions([]); return }
@@ -279,7 +300,71 @@ export default function CharactersPage() {
 
   const COLUMNS = ['Maison', 'Espèce', 'Genre', 'Statut du sang','Premier livre','Patronus', 'Étudiant']
   const remaining = MAX_GUESSES - guesses.length
+// Déjà joué aujourd'hui
+if (!loading && alreadyPlayed && status !== 'playing') {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0, 0, 0, 0)
+  const hoursLeft = Math.ceil((tomorrow.getTime() - Date.now()) / 1000 / 3600)
 
+  return (
+    <>
+      <style>{`/* ... ton style existant ... */`}</style>
+      <MagicalBackground />
+      <div className="game-root">
+        <header className="game-header">
+          <span className="header-crest" aria-hidden="true">⚡</span>
+          <h1 className="game-title">HP Gamedle</h1>
+          <p className="game-subtitle">Qui suis-je ?</p>
+          <div className="header-divider" aria-hidden="true" />
+        </header>
+
+        <div style={{
+          textAlign: 'center', marginTop: '3rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(201,168,76,0.2)',
+          borderRadius: '16px', padding: '2.5rem 2rem',
+          maxWidth: '400px', width: '90%'
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+            {status === 'won' ? '⚡' : '💀'}
+          </div>
+          <h2 style={{
+            fontFamily: 'Cinzel, serif', fontSize: '1.3rem',
+            color: status === 'won' ? '#c9a84c' : '#ff6b6b',
+            marginBottom: '0.75rem'
+          }}>
+            {status === 'won' ? 'Bien joué !' : 'Pas de chance !'}
+          </h2>
+          <p style={{ color: '#9080b0', fontSize: '1rem', marginBottom: '0.5rem' }}>
+            Tu as déjà joué aujourd'hui.
+          </p>
+          <p style={{ color: '#6b5420', fontSize: '0.85rem', fontFamily: 'Cinzel, serif' }}>
+            Prochain personnage dans <strong style={{ color: '#c9a84c' }}>{hoursLeft}h</strong>
+          </p>
+
+          {/* Résumé de la partie */}
+          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {guesses.map((g, i) => (
+              <div key={i} style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                border: '1.5px solid rgba(201,168,76,0.3)',
+                overflow: 'hidden', flexShrink: 0
+              }}>
+                {g.char.image_url
+                  ? <img src={g.char.image_url} alt={g.char.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ width: '100%', height: '100%', background: 'rgba(201,168,76,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: '#c9a84c', fontFamily: 'Cinzel, serif' }}>
+                      {g.char.name.charAt(0)}
+                    </div>
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
   if (loading) {
     return (
       <div className="loading-screen">
