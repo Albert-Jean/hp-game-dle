@@ -959,22 +959,24 @@ if (!loading && alreadyPlayed && status !== 'playing') {
           </p>
         )}
 
-        {/* Column headers */}
-        {guesses.length > 0 && (
+       {/* Conteneur scrollable — headers + rows bougent ensemble */}
+      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          {guesses.length > 0 && (
           <div className="col-headers" aria-hidden="true">
-            <div />
-            {COLUMNS.map(col => (
-              <div key={col} className="col-header">{col}</div>
-            ))}
-          </div>
-        )}
-
-        {/* Guess board */}
-        <div className="guess-board" ref={boardRef} role="list" aria-label="Tentatives">
-          {guesses.map((g, i) => (
-            <GuessRow key={i} guess={g.char} results={g.results} index={i} />
+        <div />
+          {['Maison','Espèce','Genre','Statut du sang','Premier livre','Patronus','Étudiant'].map(col => (
+        <div key={col} className="col-header">{col}</div>
           ))}
         </div>
+        )}
+
+  <div className="guess-board" ref={boardRef} role="list" aria-label="Tentatives">
+    {guesses.map((g, i) => (
+      <GuessRow key={i} guess={g.char} results={g.results} index={i} />
+    ))}
+  </div>
+</div>
+
 
         {/* Legend */}
         <div className="legend" aria-label="Légende">
