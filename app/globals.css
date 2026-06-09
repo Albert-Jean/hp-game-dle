@@ -12,12 +12,58 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media(max-width:768px){
+  /* Headers + grille scrollables horizontalement */
+  .col-headers {
+    display: grid;
+    grid-template-columns: 140px repeat(7, 90px);
+    gap: 4px;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .guess-row {
+    display: grid;
+    grid-template-columns: 140px repeat(7, 90px);
+    gap: 4px;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* Wrapper scrollable */
+  .guess-board {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  /* Scrollbar stylée */
+  .guess-board::-webkit-scrollbar {
+    height: 3px;
+  }
+  .guess-board::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+  }
+  .guess-board::-webkit-scrollbar-thumb {
+    background: var(--gold-dim);
+    border-radius: 2px;
+  }
+
+  .col-header { font-size: 0.55rem; }
+  .char-name { font-size: 0.72rem; }
+  .attr-value { font-size: 0.65rem; }
+  .attr-cell { min-height: 48px; }
+  .char-avatar, .char-avatar-placeholder { width: 28px; height: 28px; }
+}
+
+@media(max-width:400px){
+  .col-headers, .guess-row {
+    grid-template-columns: 120px repeat(7, 80px);
   }
 }
+
 
 body {
   background: var(--background);
