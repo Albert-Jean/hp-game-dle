@@ -33,8 +33,6 @@
   /* Wrapper scrollable */
   .guess-board {
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: 8px;
   }
 
