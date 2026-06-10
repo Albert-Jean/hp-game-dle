@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { BOOK_SHORT, BOOK_COVERS } from '@/lib/game-logic'
 
@@ -7,9 +8,10 @@ interface Props {
   match: string
   delay: number
   label?: string
+  hint?: 'higher' | 'lower'
 }
 
-export function AttributeCell({ value, match, delay, label }: Props) {
+export function AttributeCell({ value, match, delay, label, hint }: Props) {
   const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
@@ -40,7 +42,17 @@ export function AttributeCell({ value, match, delay, label }: Props) {
                 : '1.5px solid var(--wrong-border)',
             }}
           />
-          <span className="attr-value" style={{ fontSize: '0.55rem' }}>{displayValue}</span>
+          {/* Numéro + flèche sous l'image */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+            <span className="attr-value" style={{ fontSize: '0.55rem' }}>
+              {displayValue}
+            </span>
+            {hint && match !== 'correct' && revealed && (
+              <span style={{ fontSize: '0.9rem', color: '#ffd93d', lineHeight: 1 }}>
+                {hint === 'higher' ? '↑' : '↓'}
+              </span>
+            )}
+          </div>
         </>
       ) : (
         <>
