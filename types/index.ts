@@ -33,6 +33,7 @@ export interface AttributeResult {
   label: string
   value: string
   match: MatchResult
+  hint?: 'higher' | 'lower'
 }
 
 export interface GuessEntry<T> {

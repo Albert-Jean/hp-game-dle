@@ -43,6 +43,7 @@ export function GuessRow({ label, image, results, index }: Props) {
           match={r.match}
           delay={j * 120 + 200}
           label={r.label}
+          hint={r.hint}
         />
       ))}
     </div>

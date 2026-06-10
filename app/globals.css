@@ -1,5 +1,10 @@
- @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap');
 
+@font-face {
+  font-family: 'HarryP';
+  src: url('/fonts/HARRYP_.TTF') format('truetype');
+  font-display: swap;
+}
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
@@ -17,6 +22,7 @@
           --wrong-border: #3d2d50;
           --wrong-text: #8070a0;
           --font-display: 'Cinzel', serif;
+          --font-harry: 'HarryP', 'Cinzel', serif;
           --font-body: 'Crimson Pro', serif;
         }
 
@@ -78,7 +84,7 @@
           50% { transform: translateY(-8px); }
         }
         .game-title {
-          font-family: var(--font-display);
+          font-family: var(--font-harry);
           font-size: clamp(1.8rem, 5vw, 3rem);
           font-weight: 900;
           letter-spacing: 0.08em;

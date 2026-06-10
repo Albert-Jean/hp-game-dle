@@ -26,7 +26,15 @@ export const BOOK_COVERS: Record<string, string> = {
   "The Half-Blood Prince":   'https://upload.wikimedia.org/wikipedia/en/b/b5/Harry_Potter_and_the_Half-Blood_Prince_cover.jpg',
   "The Deathly Hallows":     'https://upload.wikimedia.org/wikipedia/en/a/a9/Harry_Potter_and_the_Deathly_Hallows.jpg',
 }
-
+const BOOK_ORDER: Record<string, number> = {
+  "The Philosopher's Stone": 1,
+  "The Chamber of Secrets":  2,
+  "The Prisoner of Azkaban": 3,
+  "The Goblet of Fire":      4,
+  "The Order of the Phoenix":5,
+  "The Half-Blood Prince":   6,
+  "The Deathly Hallows":     7,
+}
 // ─── Character compare ────────────────────────────────────────────────────────
 
 export function compareCharacters(guess: Character, target: Character): AttributeResult[] {
@@ -35,7 +43,18 @@ export function compareCharacters(guess: Character, target: Character): Attribut
     { label: 'Espèce',         value: val(guess.species),          match: exact(guess.species, target.species) },
     { label: 'Genre',          value: val(guess.gender),           match: exact(guess.gender, target.gender) },
     { label: 'Statut du sang', value: val(guess.blood_status),     match: exact(guess.blood_status, target.blood_status) },
-    { label: 'Premier livre',  value: val(guess.first_appearance), match: exact(guess.first_appearance, target.first_appearance) },
+   {
+  label: 'Premier livre',
+  value: val(guess.first_appearance),
+  match: exact(guess.first_appearance, target.first_appearance),
+  // Ajoute l'indication de direction
+  hint: (() => {
+    const g = BOOK_ORDER[guess.first_appearance ?? '']
+    const t = BOOK_ORDER[target.first_appearance ?? '']
+    if (!g || !t || g === t) return undefined
+    return g < t ? 'higher' : 'lower'
+  })()
+},
     { label: 'Patronus',       value: val(guess.patronus),         match: exact(guess.patronus, target.patronus) },
     { label: 'Étudiant',       value: fmt(guess.is_student),       match: exact(guess.is_student, target.is_student) },
   ]
