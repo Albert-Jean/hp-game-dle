@@ -9,6 +9,7 @@ interface Props {
   image: string | null
   results: AttributeResult[]
   index: number
+  hint?: 'higher' | 'lower'
 }
 
 export function GuessRow({ label, image, results, index }: Props) {
