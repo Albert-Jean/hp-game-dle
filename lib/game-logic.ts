@@ -8,13 +8,13 @@ const exact = (a: unknown, b: unknown): 'correct' | 'wrong' =>
 // ─── Book helpers ─────────────────────────────────────────────────────────────
 
 export const BOOK_SHORT: Record<string, string> = {
-  "The Philosopher's Stone": 'T1',
-  "The Chamber of Secrets":  'T2',
-  "The Prisoner of Azkaban": 'T3',
-  "The Goblet of Fire":      'T4',
-  "The Order of the Phoenix":'T5',
-  "The Half-Blood Prince":   'T6',
-  "The Deathly Hallows":     'T7',
+  "The Philosopher's Stone": "A l'école des sorceiers",
+  "The Chamber of Secrets":  'La Chambre des Secrets',
+  "The Prisoner of Azkaban": "Le Prisonier d'Azkaban",
+  "The Goblet of Fire":      "La Coupe de Feu",
+  "The Order of the Phoenix": "L'Ordre du Phénix",
+  "The Half-Blood Prince":   "Le Prince de Sang-Mélé",
+  "The Deathly Hallows":     "Les Reliques de la Mort",
 }
 
 export const BOOK_COVERS: Record<string, string> = {
