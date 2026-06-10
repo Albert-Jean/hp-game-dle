@@ -42,8 +42,17 @@ useEffect(() => {
         .select('*')
         .order('name' as any)
 
-      if (fetchError) { setError(`Erreur: ${fetchError.message}`); setLoading(false); return }
-      if (!data?.length) { setError(`Table ${mode.table} vide`); setLoading(false); return }
+      if (fetchError) {
+        setError(`Erreur fetch: ${fetchError.message}`)
+        setLoading(false)
+        return
+      }
+
+      if (!data?.length) {
+        setError(`Table ${mode.table} vide ou introuvable`)
+        setLoading(false)
+        return
+      }
 
       setAllEntities(data as T[])
 
@@ -56,10 +65,12 @@ useEffect(() => {
         .eq('mode', mode.id)
         .maybeSingle()
 
-      const found = daily ? (data as T[]).find(e => e.id === daily.entity_id) : null
+      const found = daily
+        ? (data as T[]).find(e => e.id === daily.entity_id)
+        : null
       setTarget(found ?? (data as T[])[Math.floor(Math.random() * data.length)])
 
-      // 3. Charger la sauvegarde localStorage APRÈS les données
+      // 3. Charger localStorage APRÈS les données
       const saved = loadGame<T>(mode.storageKey())
       if (saved && saved.guesses.length > 0) {
         setGuesses(saved.guesses)
@@ -68,6 +79,7 @@ useEffect(() => {
       }
 
       setLoading(false)
+
     } catch (err: any) {
       setError(`Erreur inattendue: ${err.message}`)
       setLoading(false)
@@ -75,6 +87,7 @@ useEffect(() => {
   }
   load()
 }, [mode])
+
 
 
   // ── Suggestions ───────────────────────────────────────────────────────────
