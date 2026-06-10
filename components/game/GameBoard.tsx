@@ -26,29 +26,28 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
   const [shakeInput, setShakeInput] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
-
-  // ── Load saved game ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const saved = loadGame<T>(mode.storageKey())
-    if (saved) {
-      setGuesses(saved.guesses)
-      setStatus(saved.status)
-      setAlreadyPlayed(true)
-    }
-  }, [mode])
+  const [error,setError]=useState<string|null>(null)
 
   // ── Save on every guess ────────────────────────────────────────────────────
   useEffect(() => {
     if (guesses.length > 0) saveGame(mode.storageKey(), guesses, status)
   }, [guesses, status, mode])
+  // ── Load saved game + fetch data en même temps ─────────────────────────────
+useEffect(() => {
+  async function load() {
+    try {
+      // 1. Charger les données Supabase
+      const { data, error: fetchError } = await supabase
+        .from(mode.table)
+        .select('*')
+        .order('name' as any)
 
-  // ── Fetch data ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    async function load() {
-      const { data } = await supabase.from(mode.table).select('*').order('name' as any)
-      if (!data) { setLoading(false); return }
+      if (fetchError) { setError(`Erreur: ${fetchError.message}`); setLoading(false); return }
+      if (!data?.length) { setError(`Table ${mode.table} vide`); setLoading(false); return }
+
       setAllEntities(data as T[])
 
+      // 2. Charger le jeu du jour
       const today = new Date().toISOString().split('T')[0]
       const { data: daily } = await supabase
         .from('daily_games')
@@ -59,10 +58,24 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
 
       const found = daily ? (data as T[]).find(e => e.id === daily.entity_id) : null
       setTarget(found ?? (data as T[])[Math.floor(Math.random() * data.length)])
+
+      // 3. Charger la sauvegarde localStorage APRÈS les données
+      const saved = loadGame<T>(mode.storageKey())
+      if (saved && saved.guesses.length > 0) {
+        setGuesses(saved.guesses)
+        setStatus(saved.status)
+        setAlreadyPlayed(true)
+      }
+
+      setLoading(false)
+    } catch (err: any) {
+      setError(`Erreur inattendue: ${err.message}`)
       setLoading(false)
     }
-    load()
-  }, [mode])
+  }
+  load()
+}, [mode])
+
 
   // ── Suggestions ───────────────────────────────────────────────────────────
   useEffect(() => {
