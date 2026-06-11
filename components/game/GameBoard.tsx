@@ -160,7 +160,7 @@ useEffect(() => {
       <MagicalBackground />
       <header className="game-header">
         <span className="header-crest" aria-hidden="true">{mode.icon}</span>
-        <h1 className="game-title">HP Gamedle</h1>
+        <h1 className="game-title">PotterDle</h1>
         <p className="game-subtitle">{mode.description}</p>
         <div className="header-divider" aria-hidden="true" />
       </header>
@@ -181,7 +181,7 @@ useEffect(() => {
 
         <header className="game-header">
           <span className="header-crest" aria-hidden="true">{mode.icon}</span>
-          <h1 className="game-title">HP Gamedle</h1>
+          <h1 className="game-title">PotterDle</h1>
           <p className="game-subtitle">{mode.description}</p>
           <div className="header-divider" aria-hidden="true" />
         </header>
