@@ -42,16 +42,13 @@ export function AttributeCell({ value, match, delay, label, hint }: Props) {
                 : '1.5px solid var(--wrong-border)',
             }}
           />
-          {/* Numéro + flèche sous l'image */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
             <span className="attr-value" style={{ fontSize: '0.55rem' }}>
               {displayValue}
+            </span>           
+            <span style={{ fontSize: '0.9rem', color: '#ffd93d', lineHeight: 1 }}>
+              {hint ? (hint === 'higher' ? '↑' : '↓') : '' }
             </span>
-            {hint && match !== 'correct' && revealed && (
-              <span style={{ fontSize: '0.9rem', color: '#ffd93d', lineHeight: 1 }}>
-                {hint === 'higher' ? '↑' : '↓'}
-              </span>
-            )}
           </div>
         </>
       ) : (
