@@ -1,4 +1,4 @@
-import { GameStatus, GuessEntry, AttributeResult } from '@/types'
+import { GameStatus, GuessEntry } from '@/types'
 
 interface SavedGame<T> {
   guesses: GuessEntry<T>[]

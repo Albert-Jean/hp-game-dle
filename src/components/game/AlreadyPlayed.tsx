@@ -1,3 +1,5 @@
+'use client'
+import { useTranslations } from 'next-intl'
 import { GameStatus, GuessEntry } from '@/types'
 
 interface Props<T> {
@@ -8,6 +10,8 @@ interface Props<T> {
 }
 
 export function AlreadyPlayed<T>({ status, guesses, getImage, getLabel }: Props<T>) {
+  const t = useTranslations('already_played')
+
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
   tomorrow.setHours(0, 0, 0, 0)
@@ -29,16 +33,15 @@ export function AlreadyPlayed<T>({ status, guesses, getImage, getLabel }: Props<
         color: status === 'won' ? '#c9a84c' : '#ff6b6b',
         marginBottom: '0.75rem',
       }}>
-        {status === 'won' ? 'Bien joué !' : 'Pas de chance !'}
+        {status === 'won' ? t('won') : t('lost')}
       </h2>
       <p style={{ color: '#9080b0', fontSize: '1rem', marginBottom: '0.5rem' }}>
-        Tu as déjà joué aujourd'hui.
+        {t('message')}
       </p>
       <p style={{ color: '#6b5420', fontSize: '0.85rem', fontFamily: 'Cinzel, serif' }}>
-        Prochain personnage dans <strong style={{ color: '#c9a84c' }}>{hoursLeft}h</strong>
+        {t('next', { hours: hoursLeft })}
       </p>
 
-      {/* Guesses recap */}
       <div style={{ marginTop: '1.5rem', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
         {guesses.map((g, i) => {
           const img = getImage(g.entity)

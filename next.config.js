@@ -1,7 +1,16 @@
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['api.potterdb.com'],  // pour les images des persos
+    remotePatterns: [
+      { protocol: 'https', hostname: 'hp-api.onrender.com' },
+      { protocol: 'https', hostname: 'api.potterdb.com' },
+      { protocol: 'https', hostname: 'upload.wikimedia.org' },
+    ],
   },
 }
-export default nextConfig
+
+export default withNextIntl(nextConfig)
