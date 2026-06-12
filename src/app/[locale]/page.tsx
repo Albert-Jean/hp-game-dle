@@ -6,6 +6,7 @@ import { MagicalBackground } from '@/components/ui/MagicalBackground'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { ALL_MODES } from '@/config/modes'
 
+export const runtime = 'edge'
 export default function HomePage() {
   const t = useTranslations()
   const locale = useLocale()
