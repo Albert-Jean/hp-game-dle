@@ -2,14 +2,15 @@ import { ModeConfig, Character, Spell } from '@/types'
 import { compareCharacters, compareSpells } from '@/lib/game-logic'
 import { todayKey } from '@/lib/storage'
 
+// NOTE: `label`/`description` are no longer hardcoded here.
+// In the UI, use t(`modes.${mode.id}.label`) and t(`modes.${mode.id}.description`).
+
 export const CHARACTERS_MODE: ModeConfig<Character> = {
   id: 'characters',
-  label: 'Personnages',
-  description: 'Trouve le personnage HP du jour',
   icon: '⚡',
   table: 'characters',
   maxGuesses: 6,
-  columns: ['Maison', 'Espèce', 'Genre', 'Statut du sang', 'Premier livre', 'Patronus', 'Étudiant'],
+  columns: ['house', 'species', 'gender', 'blood_status', 'first_appearance', 'patronus', 'is_student'],
   compare: compareCharacters,
   getLabel: (c) => c.name,
   getImage: (c) => c.image_url,
@@ -18,14 +19,14 @@ export const CHARACTERS_MODE: ModeConfig<Character> = {
 
 export const SPELLS_MODE: ModeConfig<Spell> = {
   id: 'spells',
-  label: 'Sorts',
-  description: 'Trouve le sort HP du jour',
   icon: '🪄',
   table: 'spells',
   maxGuesses: 6,
-  columns: ['Incantation', 'Catégorie', 'Lumière', 'Impardonnable'],
+  columns: ['incantation', 'category', 'light', 'is_unforgivable'],
   compare: compareSpells,
   getLabel: (s) => s.name,
   getImage: () => null,
   storageKey: () => todayKey('spells'),
 }
+
+export const ALL_MODES = [CHARACTERS_MODE, SPELLS_MODE]

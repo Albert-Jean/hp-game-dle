@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "HP Gamedle",
+    "subtitle": "Choisis ton défi",
+    "footer": "Un nouveau défi chaque jour"
+  },
+  "game": {
+    "subtitle": "Qui suis-je ?",
+    "search_placeholder": "Nomme un {mode}...",
+    "attempts_left": "{count} essais restants",
+    "last_attempt": "⚠️ Dernier essai !",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "loading": "Ouverture du livre des sorts..."
+  },
+  "win": {
+    "title": "Accio Victory!",
+    "subtitle_one": "Tu as trouvé en {count} essai !",
+    "subtitle_other": "Tu as trouvé en {count} essais !",
+    "button": "Nouvelle partie"
+  },
+  "lose": {
+    "title": "Avada Kedavra...",
+    "subtitle": "Tu n'as pas trouvé le personnage mystère.",
+    "button": "Réessayer"
+  },
+  "already_played": {
+    "won": "Bien joué !",
+    "lost": "Pas de chance !",
+    "message": "Tu as déjà joué aujourd'hui.",
+    "next": "Prochain personnage dans {hours}h"
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "unknown": "?"
+  },
+  "columns": {
+    "house": "Maison",
+    "species": "Espèce",
+    "gender": "Genre",
+    "blood_status": "Statut du sang",
+    "first_appearance": "Premier livre",
+    "patronus": "Patronus",
+    "is_student": "Étudiant",
+    "incantation": "Incantation",
+    "category": "Catégorie",
+    "light": "Lumière",
+    "is_unforgivable": "Impardonnable"
+  },
+  "modes": {
+    "characters": {
+      "label": "Personnages",
+      "description": "Devine le personnage HP du jour"
+    },
+    "spells": {
+      "label": "Sorts",
+      "description": "Devine le sort magique du jour"
+    }
+  }
+}

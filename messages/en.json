@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "HP Gamedle",
+    "subtitle": "Choose your challenge",
+    "footer": "A new challenge every day"
+  },
+  "game": {
+    "subtitle": "Who am I?",
+    "search_placeholder": "Name a {mode}...",
+    "attempts_left": "{count} attempts left",
+    "last_attempt": "⚠️ Last attempt!",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "loading": "Opening the spell book..."
+  },
+  "win": {
+    "title": "Accio Victory!",
+    "subtitle_one": "You found it in {count} attempt!",
+    "subtitle_other": "You found it in {count} attempts!",
+    "button": "New game"
+  },
+  "lose": {
+    "title": "Avada Kedavra...",
+    "subtitle": "You didn't find the mystery character.",
+    "button": "Try again"
+  },
+  "already_played": {
+    "won": "Well done!",
+    "lost": "Bad luck!",
+    "message": "You already played today.",
+    "next": "Next character in {hours}h"
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "unknown": "?"
+  },
+  "columns": {
+    "house": "House",
+    "species": "Species",
+    "gender": "Gender",
+    "blood_status": "Blood status",
+    "first_appearance": "First book",
+    "patronus": "Patronus",
+    "is_student": "Student",
+    "incantation": "Incantation",
+    "category": "Category",
+    "light": "Light",
+    "is_unforgivable": "Unforgivable"
+  },
+  "modes": {
+    "characters": {
+      "label": "Characters",
+      "description": "Guess today's HP character"
+    },
+    "spells": {
+      "label": "Spells",
+      "description": "Guess today's magic spell"
+    }
+  }
+}

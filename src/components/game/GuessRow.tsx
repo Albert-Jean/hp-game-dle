@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react'
 import { AttributeResult } from '@/types'
 import { AttributeCell } from './AttributeCell'
-import { BOOK_SHORT } from '@/lib/game-logic'
 
 interface Props {
   label: string
@@ -26,7 +25,6 @@ export function GuessRow({ label, image, results, index }: Props) {
       style={{ '--row-index': index } as React.CSSProperties}
       role="listitem"
     >
-      {/* Name + avatar */}
       <div className="char-cell">
         {image ? (
           <img src={image} alt={label} className="char-avatar" />
@@ -36,14 +34,13 @@ export function GuessRow({ label, image, results, index }: Props) {
         <span className="char-name">{label}</span>
       </div>
 
-      {/* Attributes */}
       {results.map((r, j) => (
         <AttributeCell
           key={j}
           value={r.value}
           match={r.match}
           delay={j * 120 + 200}
-          label={r.label}
+          labelKey={r.label}
           hint={r.hint}
         />
       ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabase'
 import { saveGame, loadGame } from '@/lib/storage'
 import { ModeConfig, GameStatus, GuessEntry, AttributeResult } from '@/types'
@@ -8,13 +9,17 @@ import { GuessRow } from './GuessRow'
 import { WinScreen } from './WinScreen'
 import { LoseScreen } from './LoseScreen'
 import { AlreadyPlayed } from './AlreadyPlayed'
+import { SearchInput } from './SearchInput'
 import { MagicalBackground } from '@/components/ui/MagicalBackground'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 
 interface Props<T extends { id: string }> {
   mode: ModeConfig<T>
 }
 
 export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
+  const t = useTranslations()
+
   const [allEntities, setAllEntities] = useState<T[]>([])
   const [target, setTarget] = useState<T | null>(null)
   const [search, setSearch] = useState('')
@@ -24,71 +29,67 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
   const [loading, setLoading] = useState(true)
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
   const [shakeInput, setShakeInput] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
-  const [error,setError]=useState<string|null>(null)
+
+  // ── Fetch data + saved game (single effect, correct order) ─────────────────
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from(mode.table)
+          .select('*')
+          .order('name' as any)
+
+        if (fetchError) {
+          setError(`Erreur fetch (${mode.table}): ${fetchError.message}`)
+          setLoading(false)
+          return
+        }
+
+        if (!data?.length) {
+          setError(`Table "${mode.table}" vide ou introuvable`)
+          setLoading(false)
+          return
+        }
+
+        setAllEntities(data as T[])
+
+        const today = new Date().toISOString().split('T')[0]
+        const { data: daily } = await supabase
+          .from('daily_games')
+          .select('entity_id')
+          .eq('game_date', today)
+          .eq('mode', mode.id)
+          .maybeSingle()
+
+        const found = daily
+          ? (data as T[]).find(e => e.id === daily.entity_id)
+          : null
+        setTarget(found ?? (data as T[])[Math.floor(Math.random() * data.length)])
+
+        // Load localStorage AFTER data is ready
+        const saved = loadGame<T>(mode.storageKey())
+        if (saved && saved.guesses.length > 0) {
+          setGuesses(saved.guesses)
+          setStatus(saved.status)
+          setAlreadyPlayed(true)
+        }
+
+        setLoading(false)
+      } catch (err: any) {
+        setError(`Erreur inattendue: ${err.message}`)
+        setLoading(false)
+      }
+    }
+    load()
+  }, [mode])
 
   // ── Save on every guess ────────────────────────────────────────────────────
   useEffect(() => {
     if (guesses.length > 0) saveGame(mode.storageKey(), guesses, status)
   }, [guesses, status, mode])
-  // ── Load saved game + fetch data en même temps ─────────────────────────────
-useEffect(() => {
-  async function load() {
-    try {
-      // 1. Charger les données Supabase
-      const { data, error: fetchError } = await supabase
-        .from(mode.table)
-        .select('*')
-        .order('name' as any)
-
-      if (fetchError) {
-        setError(`Erreur fetch: ${fetchError.message}`)
-        setLoading(false)
-        return
-      }
-
-      if (!data?.length) {
-        setError(`Table ${mode.table} vide ou introuvable`)
-        setLoading(false)
-        return
-      }
-
-      setAllEntities(data as T[])
-
-      // 2. Charger le jeu du jour
-      const today = new Date().toISOString().split('T')[0]
-      const { data: daily } = await supabase
-        .from('daily_games')
-        .select('entity_id')
-        .eq('game_date', today)
-        .eq('mode', mode.id)
-        .maybeSingle()
-
-      const found = daily
-        ? (data as T[]).find(e => e.id === daily.entity_id)
-        : null
-      setTarget(found ?? (data as T[])[Math.floor(Math.random() * data.length)])
-
-      // 3. Charger localStorage APRÈS les données
-      const saved = loadGame<T>(mode.storageKey())
-      if (saved && saved.guesses.length > 0) {
-        setGuesses(saved.guesses)
-        setStatus(saved.status)
-        setAlreadyPlayed(true)
-      }
-
-      setLoading(false)
-
-    } catch (err: any) {
-      setError(`Erreur inattendue: ${err.message}`)
-      setLoading(false)
-    }
-  }
-  load()
-}, [mode])
-
-
 
   // ── Suggestions ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -139,6 +140,8 @@ useEffect(() => {
   }
 
   const remaining = mode.maxGuesses - guesses.length
+  const modeLabel = t(`modes.${mode.id}.label`)
+  const modeDescription = t(`modes.${mode.id}.description`)
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) return (
@@ -146,11 +149,30 @@ useEffect(() => {
       <MagicalBackground />
       <div className="loading-content">
         <span className="loading-wand" aria-hidden="true">🪄</span>
-        <p className="loading-text">Ouverture du livre des sorts...</p>
-        <div className="loading-dots" aria-label="Chargement">
+        <p className="loading-text">{t('game.loading')}</p>
+        <div className="loading-dots" aria-label="Loading">
           <span /><span /><span />
         </div>
       </div>
+    </div>
+  )
+
+  // ── Error ──────────────────────────────────────────────────────────────────
+  if (error) return (
+    <div style={{
+      minHeight: '100vh', background: '#05040a',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', gap: '1rem', padding: '2rem',
+    }}>
+      <div style={{ fontSize: '2rem' }}>💀</div>
+      <p style={{
+        color: '#ff6b6b', fontFamily: 'monospace',
+        fontSize: '0.9rem', textAlign: 'center',
+        background: 'rgba(255,0,0,0.1)', padding: '1rem',
+        borderRadius: '8px', maxWidth: '500px',
+      }}>
+        {error}
+      </p>
     </div>
   )
 
@@ -159,9 +181,12 @@ useEffect(() => {
     <div className="game-root">
       <MagicalBackground />
       <header className="game-header">
+        <div className="header-top">
+          <LanguageSwitcher />
+        </div>
         <span className="header-crest" aria-hidden="true">{mode.icon}</span>
-        <h1 className="game-title">PotterDle</h1>
-        <p className="game-subtitle">{mode.description}</p>
+        <h1 className="game-title">{t('home.title')}</h1>
+        <p className="game-subtitle">{modeDescription}</p>
         <div className="header-divider" aria-hidden="true" />
       </header>
       <AlreadyPlayed
@@ -180,14 +205,17 @@ useEffect(() => {
       <div className="game-root">
 
         <header className="game-header">
+          <div className="header-top">
+            <LanguageSwitcher />
+          </div>
           <span className="header-crest" aria-hidden="true">{mode.icon}</span>
-          <h1 className="game-title">PotterDle</h1>
-          <p className="game-subtitle">{mode.description}</p>
+          <h1 className="game-title">{t('home.title')}</h1>
+          <p className="game-subtitle">{t('game.subtitle')}</p>
           <div className="header-divider" aria-hidden="true" />
         </header>
 
         {/* Attempts dots */}
-        <div className="attempts-row" role="status" aria-label={`${remaining} essais restants`}>
+        <div className="attempts-row" role="status" aria-label={t('game.attempts_left', { count: remaining })}>
           {Array.from({ length: mode.maxGuesses }).map((_, i) => (
             <div key={i} className={`attempt-dot ${
               i < guesses.length ? (i === mode.maxGuesses - 1 ? 'last' : 'used') : ''
@@ -197,50 +225,27 @@ useEffect(() => {
 
         {/* Search */}
         {status === 'playing' && (
-          <div className="search-container">
-            <div className={`search-wrap ${shakeInput ? 'shake' : ''}`}>
-              <span className="search-icon" aria-hidden="true">🔍</span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder={`Nomme un ${mode.label.toLowerCase()}...`}
-                className="search-input"
-                aria-label={`Chercher un ${mode.label}`}
-                aria-autocomplete="list"
-                autoComplete="off"
-              />
-            </div>
-            {suggestions.length > 0 && (
-              <div className="suggestions" role="listbox">
-                {suggestions.map(entity => (
-                  <button
-                    key={entity.id}
-                    role="option"
-                    className="suggestion-item"
-                    onClick={() => handleGuess(entity)}
-                  >
-                    {mode.getImage(entity)
-                      ? <img src={mode.getImage(entity)!} alt="" className="suggestion-avatar" aria-hidden="true" />
-                      : <div className="suggestion-placeholder" aria-hidden="true">
-                          {mode.getLabel(entity).charAt(0)}
-                        </div>
-                    }
-                    <span>{mode.getLabel(entity)}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            onSelect={id => {
+              const entity = allEntities.find(e => e.id === id)
+              if (entity) handleGuess(entity)
+            }}
+            suggestions={suggestions.map(e => ({
+              id: e.id,
+              label: mode.getLabel(e),
+              image: mode.getImage(e),
+            }))}
+            placeholder={t('game.search_placeholder', { mode: modeLabel.toLowerCase() })}
+            shake={shakeInput}
+          />
         )}
 
         {/* Hint */}
         {status === 'playing' && guesses.length > 0 && (
           <p className={`hint-message ${remaining <= 1 ? 'danger' : remaining <= 2 ? 'warning' : 'normal'}`}>
-            {remaining <= 1
-              ? '⚠️ Dernier essai !'
-              : `${remaining} essais restants`}
+            {remaining <= 1 ? t('game.last_attempt') : t('game.attempts_left', { count: remaining })}
           </p>
         )}
 
@@ -252,12 +257,12 @@ useEffect(() => {
               <div className="col-headers" aria-hidden="true">
                 <div />
                 {mode.columns.map(col => (
-                  <div key={col} className="col-header">{col}</div>
+                  <div key={col} className="col-header">{t(`columns.${col}`)}</div>
                 ))}
               </div>
             )}
 
-            <div className="guess-board" ref={boardRef} role="list" aria-label="Tentatives">
+            <div className="guess-board" ref={boardRef} role="list" aria-label="Guesses">
               {guesses.map((g, i) => (
                 <GuessRow
                   key={i}
@@ -273,12 +278,12 @@ useEffect(() => {
         </div>
 
         {/* Legend */}
-        <div className="legend" aria-label="Légende">
+        <div className="legend" aria-label="Legend">
           <div className="legend-item">
-            <div className="legend-dot correct" aria-hidden="true" />Correct
+            <div className="legend-dot correct" aria-hidden="true" />{t('game.correct')}
           </div>
           <div className="legend-item">
-            <div className="legend-dot wrong" aria-hidden="true" />Incorrect
+            <div className="legend-dot wrong" aria-hidden="true" />{t('game.incorrect')}
           </div>
         </div>
 
