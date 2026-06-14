@@ -13,6 +13,12 @@
     "incorrect": "Incorrect",
     "loading": "Opening the spell book..."
   },
+  "blood_status": {
+    "half-blood": "Half-blood",
+    "pure-blood": "Pure-blood",
+    "muggleborn": "Muggle-born",
+    "squib": "Squib"
+  },
   "win": {
     "title": "Accio Victory!",
     "subtitle_one": "You found it in {count} attempt!",

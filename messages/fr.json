@@ -13,6 +13,20 @@
     "incorrect": "Incorrect",
     "loading": "Ouverture du livre des sorts..."
   },
+  "blood_status": {
+    "half-blood": "Sang-mêlé",
+    "pure-blood": "Sang-pur",
+    "muggleborn": "Né-Moldu",
+    "squib": "Cracmol"
+  },
+  "house": {
+    "Gryffindor": "Gryffondor",
+    "Slytherin": "Serpentard",
+    "Ravenclaw": "Serdaigle",
+    "Hufflepuff": "Poufsouffle",
+    "Durmstrang": "Durmstrang",
+    "Beauxbatons": "Beauxbâtons"
+  }, 
   "win": {
     "title": "Accio Victory!",
     "subtitle_one": "Tu as trouvé en {count} essai !",

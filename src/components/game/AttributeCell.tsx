@@ -32,7 +32,12 @@ export function AttributeCell({ value, match, delay, labelKey, hint }: Props) {
   else if (value === NO) displayValue = t('common.no')
   else if (value === UNKNOWN) displayValue = t('common.unknown')
   else if (isBook) displayValue = BOOK_SHORT[value] ?? value
-
+  else if (labelKey === 'blood_status' && t.has(`blood_status.${value}`)) {
+  displayValue = t(`blood_status.${value}`)
+}
+else if (labelKey === 'house' && t.has(`house.${value}`)) {
+  displayValue = t(`house.${value}`)
+}
   const columnLabel = labelKey ? t(`columns.${labelKey}`) : undefined
 
   return (
