@@ -250,7 +250,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
         )}
 
         {/* Grid — headers + rows scroll together */}
-        <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
+        <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
           <div style={{ width: 'max-content', minWidth: '100%' }}>
 
             {guesses.length > 0 && (

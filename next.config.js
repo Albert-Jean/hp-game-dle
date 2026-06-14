@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'hp-api.onrender.com' },
       { protocol: 'https', hostname: 'api.potterdb.com' },
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
+      { protocol: 'https', hostname: 'erbylsyrvjtiekstfgzg.supabase.co' }
     ],
   },
 }
