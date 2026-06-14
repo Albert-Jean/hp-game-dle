@@ -2,9 +2,6 @@ import { ModeConfig, Character, Spell } from '@/types'
 import { compareCharacters, compareSpells } from '@/lib/game-logic'
 import { todayKey } from '@/lib/storage'
 
-// NOTE: `label`/`description` are no longer hardcoded here.
-// In the UI, use t(`modes.${mode.id}.label`) and t(`modes.${mode.id}.description`).
-
 export const CHARACTERS_MODE: ModeConfig<Character> = {
   id: 'characters',
   icon: '⚡',
@@ -12,7 +9,7 @@ export const CHARACTERS_MODE: ModeConfig<Character> = {
   maxGuesses: 6,
   columns: ['house', 'species', 'gender', 'blood_status', 'first_appearance', 'patronus', 'is_student'],
   compare: compareCharacters,
-  getLabel: (c) => c.name,
+  getLabel: (c, locale) => (locale === 'fr' ? (c.name_fr ?? c.name) : c.name),
   getImage: (c) => c.image_url,
   storageKey: () => todayKey('characters'),
 }
@@ -24,7 +21,7 @@ export const SPELLS_MODE: ModeConfig<Spell> = {
   maxGuesses: 6,
   columns: ['incantation', 'category', 'light', 'is_unforgivable'],
   compare: compareSpells,
-  getLabel: (s) => s.name,
+  getLabel: (s, locale) => (locale === 'fr' ? (s.name_fr ?? s.name) : s.name),
   getImage: () => null,
   storageKey: () => todayKey('spells'),
 }

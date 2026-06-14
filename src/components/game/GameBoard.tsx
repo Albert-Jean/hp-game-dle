@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase'
 import { saveGame, loadGame } from '@/lib/storage'
 import { ModeConfig, GameStatus, GuessEntry, AttributeResult } from '@/types'
@@ -19,7 +19,7 @@ interface Props<T extends { id: string }> {
 
 export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
   const t = useTranslations()
-
+  const locale = useLocale()
   const [allEntities, setAllEntities] = useState<T[]>([])
   const [target, setTarget] = useState<T | null>(null)
   const [search, setSearch] = useState('')
@@ -98,7 +98,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
     setSuggestions(
       allEntities
         .filter(e =>
-          mode.getLabel(e).toLowerCase().includes(search.toLowerCase()) &&
+          mode.getLabel(e,locale).toLowerCase().includes(search.toLowerCase()) &&
           !guessed.includes(e.id)
         )
         .slice(0, 6)
@@ -193,7 +193,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
         status={status}
         guesses={guesses}
         getImage={mode.getImage}
-        getLabel={mode.getLabel}
+        getLabel={(entity: T) => mode.getLabel(entity, locale)}
       />
     </div>
   )
@@ -234,7 +234,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
             }}
             suggestions={suggestions.map(e => ({
               id: e.id,
-              label: mode.getLabel(e),
+              label: mode.getLabel(e,locale),
               image: mode.getImage(e),
             }))}
             placeholder={t('game.search_placeholder', { mode: modeLabel.toLowerCase() })}
@@ -266,7 +266,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
               {guesses.map((g, i) => (
                 <GuessRow
                   key={i}
-                  label={mode.getLabel(g.entity)}
+                  label={mode.getLabel(g.entity,locale)}
                   image={mode.getImage(g.entity)}
                   results={g.results}
                   index={i}
@@ -291,7 +291,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
 
       {status === 'won' && target && (
         <WinScreen
-          label={mode.getLabel(target)}
+          label={mode.getLabel(target,locale)}
           image={mode.getImage(target)}
           guessCount={guesses.length}
           onReset={reset}
@@ -299,7 +299,7 @@ export function GameBoard<T extends { id: string }>({ mode }: Props<T>) {
       )}
       {status === 'lost' && target && (
         <LoseScreen
-          label={mode.getLabel(target)}
+          label={mode.getLabel(target,locale)}
           image={mode.getImage(target)}
           onReset={reset}
         />
