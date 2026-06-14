@@ -3,6 +3,7 @@
 export interface Character {
   id: string
   name: string
+  name_fr: string | null   // ← ajoute ça
   house: string | null
   species: string | null
   gender: string | null
@@ -16,6 +17,7 @@ export interface Character {
 export interface Spell {
   id: string
   name: string
+  name_fr: string | null   // ← ajoute ça
   incantation: string | null
   effect: string | null
   category: string | null
@@ -54,14 +56,12 @@ export interface GuessEntry<T> {
 
 export interface ModeConfig<T> {
   id: GameMode
-  /** translation key suffix, e.g. modes.characters.label */
   icon: string
   table: string
   maxGuesses: number
-  /** translation keys, resolved via t(`columns.${key}`) */
   columns: string[]
   compare: (guess: T, target: T) => AttributeResult[]
-  getLabel: (entity: T) => string
+  getLabel: (entity: T, locale: string) => string
   getImage: (entity: T) => string | null
   storageKey: () => string
 }
