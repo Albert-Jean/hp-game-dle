@@ -2,7 +2,7 @@
 
 Un jeu de devinettes quotidien dans l'univers Harry Potter, inspiré de [Gamedle](https://www.gamedle.wtf). Chaque jour, un nouveau personnage (ou sort) à deviner en 6 essais grâce aux indices colorés.
 
-![HP Gamedle](https://hp-game-dle.pages.dev/fr)
+[HP Gamedle](https://hp-game-dle.pages.dev/fr)
 
 ---
 
